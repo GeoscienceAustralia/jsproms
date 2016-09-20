@@ -55,18 +55,20 @@ function Agent(label, uri, givenName, familyName, mbox) {
     Build Entity
 */
 
-function Entity(label, uri, comment, wasAttributedTo, creator, created, licence, metadataUri, downloadURL) {
+function Entity(label, uri, comment) {
+//(label, uri, comment, wasAttributedTo, creator, created, licence, metadataUri, downloadURL)
     this.label = label;
     if (uri) {
         this.uri = uri;
+        console.log("testing uri  " +uri +" testing again " +this.uri);
     }
-    else {
-        this.uri = 'http://placeholder.org#';
-    }
+    //else {
+    //    this.uri = 'http://placeholder.org#';
+    //}
     if (comment) {
         this.comment = comment;
     }
-    if (wasAttributedTo) {  
+/*    if (wasAttributedTo) {
         this.wasAttributedTo = wasAttributedTo;
     }
     if (creator) {
@@ -84,16 +86,15 @@ function Entity(label, uri, comment, wasAttributedTo, creator, created, licence,
     if (downloadURL) {
         this.downloadURL = downloadURL;
     }
-
-
-
+*/
 
     this.makeGraph = function() {
 
         this.g = new $rdf.graph();
-
         this.g.add($rdf.sym(this.uri), RDF('type'), PROV('Entity'));
-
+        this.g.add($rdf.sym(this.uri), RDFS('label'), $rdf.lit(this.label, 'en', XSD('string')));
+        this.g.add($rdf.sym(this.uri), RDFS('comment'), $rdf.lit(this.comment, 'en', XSD('string')));
+/*
         if (this.wasAttributedTo) {
             this.g.add($rdf.sym(this.uri), PROV('wasAttributedTo'), $rdf.sym(this.wasAttributedTo.uri));
         }
@@ -117,57 +118,57 @@ function Entity(label, uri, comment, wasAttributedTo, creator, created, licence,
         if (this.downloadURL) {
             this.g.add($rdf.sym(this.uri), DCAT('downloadURL'), $rdf.lit(this.downloadURL, 'en', XSD('anyUri')));
         }
+*/
     };
 
 
-    this.get_graph = function () {
+   this.get_graph = function () {
         if (!this.g) {
             this.makeGraph();
             return this.g;
         }
     };
-
+    this.serialize_graph = function() {
+        var sg = this.get_graph();
+        var triples = new $rdf.serialize(sg.toN3(sg));
+        return triples;
+     };
 }
+
 
 /*
     Build Activity
 */
 
-function Activity(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, comment, used_entities, generated_entities, wasInformedBy, namedActivityUri) {
+function Activity(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, comment, used_entities, generated_entities) {
+//(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, comment, used_entities, generated_entities, wasInformedBy, namedActivityUri) {
 
     this.label = label;
 
     this.startedAtTime = startedAtTime;
     this.endedAtTime = endedAtTime;
 
+    if (comment) {
+        this.comment = uri;
+    }
+
     if (uri) {
         this.uri = uri;
-    }
-    else {
-        this.uri = 'http://placeholder.org#';
     }
 
     if (wasAssociatedWith) {
         this.wasAssociatedWith = wasAssociatedWith;
     }
+    this.used_entities = used_entities;
+    this.generated_entities = generated_entities;
 
-    if (used_entities) {
-        this.used_entities = used_entities;
-    }
-
-    if (generated_entities) {
-        this.generated_entities = generated_entities;
-    }
-
-    if (wasInformedBy) {
-        this.wasInformedBy = wasInformedBy;
-    }
 
     this.makeGraph = function () {
         this.g = new $rdf.graph();
 
         this.g.add($rdf.sym(this.uri), RDF('type'), PROV('Activity'));
-
+        this.g.add($rdf.sym(this.uri), RDFS('label'), $rdf.lit(this.label, 'en', XSD('string')));
+        this.g.add($rdf.sym(this.uri), RDFS('comment'), $rdf.lit(this.comment, 'en', XSD('string')));
         this.g.add($rdf.sym(this.uri), PROV('startedAtTime'),$rdf.lit(this.startedAtTime, 'en', XSD('dateTime')) )
         this.g.add($rdf.sym(this.uri), PROV('endedAtTime'),$rdf.lit(this.endedAtTime, 'en', XSD('dateTime')) )
 
@@ -176,30 +177,18 @@ function Activity(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, com
         }
 
         if (this.used_entities) {
-            for (var used_entity in used_entities) {
-                // add entity to graph
-                console.log("testing jsproms " + used_entities[used_entity].uri);
-                this.g.add(used_entities[used_entity].get_graph());
-                // associate entity with activity
-                this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(used_entities[used_entity].uri));
-            }
+            var usedE = new $rdf.graph;
+            usedE = this.used_entities.get_graph();
+            this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(this.used_entities.uri));
+            this.g.add(usedE);
         }
-
         if (this.generated_entities) {
-            for (var generated_entity in generated_entities) {
-                // add entity to graph
-                this.g.add(generated_entities[generated_entity].get_graph());
-                // associate entity with activity
-                this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(generated_entities[generated_entity].uri));
-            }
+            var genE = new $rdf.graph;
+            genE = this.generated_entities.get_graph();
+            this.g.add($rdf.sym(this.uri), PROV('generated'), $rdf.sym(this.generated_entities.uri));
+            this.g.add(genE);
         }
-
-        if (this.wasInformedBy) {
-            this.g.add($rdf.sym(this.uri), PROV('wasInformedBy'),$rdf.sym(this.wasInformedBy.uri));
-        }
-
     };
-
 
     this.get_graph = function () {
         if (!this.g) {
@@ -230,6 +219,7 @@ function ReportingSystem(label, uri, comment, actedOnBehalfOf) {
         this.actedOnBehalfOf = actedOnBehalfOf;
     }
 
+
     this.makeGraph = function () {
         this.g = new $rdf.graph();
 
@@ -247,6 +237,9 @@ function ReportingSystem(label, uri, comment, actedOnBehalfOf) {
             this.g.add(ag);
 
         }
+
+
+
     };
 
     this.get_graph = function () {
