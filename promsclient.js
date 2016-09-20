@@ -66,7 +66,7 @@ function Entity(label, uri, comment, wasAttributedTo, creator, created, licence,
     if (comment) {
         this.comment = comment;
     }
-    if (wasAttributedTo) {
+    if (wasAttributedTo) {  
         this.wasAttributedTo = wasAttributedTo;
     }
     if (creator) {
@@ -117,14 +117,15 @@ function Entity(label, uri, comment, wasAttributedTo, creator, created, licence,
         if (this.downloadURL) {
             this.g.add($rdf.sym(this.uri), DCAT('downloadURL'), $rdf.lit(this.downloadURL, 'en', XSD('anyUri')));
         }
-    }
+    };
 
-    this.get_graph() = function {
-         if (!this.g) {
-             this.makeGraph();
-             return this.g;
-         }
-    }
+
+    this.get_graph = function () {
+        if (!this.g) {
+            this.makeGraph();
+            return this.g;
+        }
+    };
 
 }
 
@@ -177,18 +178,19 @@ function Activity(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, com
         if (this.used_entities) {
             for (var used_entity in used_entities) {
                 // add entity to graph
-                this.g.add(used_entity.get_graph());
+                console.log("testing jsproms " + used_entities[used_entity].uri);
+                this.g.add(used_entities[used_entity].get_graph());
                 // associate entity with activity
-                this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(used_entity.uri));
+                this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(used_entities[used_entity].uri));
             }
         }
 
         if (this.generated_entities) {
-            for (var generated_activity in generated_entities) {
+            for (var generated_entity in generated_entities) {
                 // add entity to graph
-                this.g.add(generated_entities.get_graph());
+                this.g.add(generated_entities[generated_entity].get_graph());
                 // associate entity with activity
-                this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(generated_entities.uri));
+                this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(generated_entities[generated_entity].uri));
             }
         }
 
@@ -270,7 +272,7 @@ function Report(label, reportingSystem, nativeId, reportActivity, comment, repor
 
 
 
-    this.make_graph = function() {
+    this.makeGraph = function() {
         this.g = new $rdf.graph();
 
         if (this.reportType == "basic") {
@@ -280,16 +282,17 @@ function Report(label, reportingSystem, nativeId, reportActivity, comment, repor
             this.g.add($rdf.sym(this.uri), RDF('type'), PROMS('ExternalReport'));
         }
 
-        this.g.add(this.reportingSystem.get_graph());
+        //this.g.add(this.reportingSystem.get_graph());
         this.g.add($rdf.sym(this.uri), PROMS('reportinSystem'), $rdf.sym(this.reportingSystem.uri));
 
-        this.g.add($rdf.sym(this.uri), PROMS('nativeId'),$rdf.lit(this.nativeId, 'en', XSD('string') )
+        this.g.add($rdf.sym(this.uri), PROMS('nativeId'),$rdf.lit(this.nativeId, 'en', XSD('string')));
 
         this.g.add(this.reportActivity.get_graph());
         this.g.add($rdf.sym(this.uri), PROMS('startingActivity'), $rdf.lit(this.reportActivity, 'en', XSD('string')));
         this.g.add($rdf.sym(this.uri), PROMS('endingActivity'), $rdf.lit(this.reportActivity, 'en', XSD('string')));
 
     }
+
 
     this.get_graph = function () {
         if (!this.g) {
