@@ -122,6 +122,10 @@ function Entity(label, uri, comment) {
     };
 
 
+
+
+
+
    this.get_graph = function () {
         if (!this.g) {
             this.makeGraph();
@@ -149,11 +153,15 @@ function Activity(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, com
     this.endedAtTime = endedAtTime;
 
     if (comment) {
-        this.comment = uri;
+        this.comment = comment;
     }
+
 
     if (uri) {
         this.uri = uri;
+    }
+    else {
+        this.uri = 'http://placeholder.org#';
     }
 
     if (wasAssociatedWith) {
@@ -195,7 +203,7 @@ function Activity(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, com
             this.makeGraph();
             return this.g;
         }
-    }
+    };
 }
 
 
@@ -226,8 +234,9 @@ function ReportingSystem(label, uri, comment, actedOnBehalfOf) {
         this.g.add($rdf.sym(this.uri), RDF('type'), PROMS('ReportingSystem'));
 
         this.g.add($rdf.sym(this.uri), RDFS('label'), $rdf.lit(this.label, 'en', XSD('string')));
-        this.g.add($rdf.sym(this.uri), RDFS('comment'), $rdf.lit(this.comment, 'en', XSD('string')));
-
+        if (this.comment) {
+            this.g.add($rdf.sym(this.uri), RDFS('comment'), $rdf.lit(this.comment, 'en', XSD('string')));
+        }
         if (this.actedOnBehalfOf) {
              // get graph of person, add it to this graph
             var ag = new $rdf.graph;
@@ -247,23 +256,27 @@ function ReportingSystem(label, uri, comment, actedOnBehalfOf) {
             this.makeGraph();
             return this.g;
         }
-    }
+    };
 }
 
 /*
     Build Report
 */
 
-function Report(label, reportingSystem, nativeId, reportActivity, comment, reportType) {
+function Report(label, reportingSystemURI, nativeId, reportActivity, comment, reportType, generatedAtTime) {
 
     this.label = label;
     this.uri = 'http://placeholder.org/reporting#';
-    this.reportingSystem = reportingSystem;
+    this.reportingSystemURI = reportingSystemURI;
     this.nativeId = nativeId;
     this.reportActivity = reportActivity;
+
+    if (comment) {
+        this.comment = comment;
+    }
+
     this.reportType = reportType;
-
-
+    this.generatedAtTime = generatedAtTime;
 
     this.makeGraph = function() {
         this.g = new $rdf.graph();
@@ -274,17 +287,19 @@ function Report(label, reportingSystem, nativeId, reportActivity, comment, repor
         else if (this.reportType = "external") {
             this.g.add($rdf.sym(this.uri), RDF('type'), PROMS('ExternalReport'));
         }
+        this.g.add($rdf.sym(this.uri), RDFS('label'), $rdf.lit(this.label, 'en', XSD('string')));
 
         //this.g.add(this.reportingSystem.get_graph());
-        this.g.add($rdf.sym(this.uri), PROMS('reportinSystem'), $rdf.sym(this.reportingSystem.uri));
+        this.g.add($rdf.sym(this.uri), PROMS('reportingSystem'), $rdf.sym(this.reportingSystemURI));
 
         this.g.add($rdf.sym(this.uri), PROMS('nativeId'),$rdf.lit(this.nativeId, 'en', XSD('string')));
 
         this.g.add(this.reportActivity.get_graph());
-        this.g.add($rdf.sym(this.uri), PROMS('startingActivity'), $rdf.lit(this.reportActivity, 'en', XSD('string')));
-        this.g.add($rdf.sym(this.uri), PROMS('endingActivity'), $rdf.lit(this.reportActivity, 'en', XSD('string')));
+        this.g.add($rdf.sym(this.uri), PROMS('startingActivity'), $rdf.sym(this.reportActivity.uri));
+        this.g.add($rdf.sym(this.uri), PROMS('endingActivity'), $rdf.sym(this.reportActivity.uri));
 
-    }
+        this.g.add($rdf.sym(this.uri), PROV('generatedAtTime'), $rdf.lit(this.generatedAtTime, 'en', XSD('dateTime')) )
+    };
 
 
     this.get_graph = function () {
@@ -292,6 +307,6 @@ function Report(label, reportingSystem, nativeId, reportActivity, comment, repor
             this.makeGraph();
             return this.g;
         }
-    }
+    };
 
 }
