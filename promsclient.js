@@ -181,21 +181,44 @@ function Activity(label, startedAtTime, endedAtTime, uri, wasAssociatedWith, com
         this.g.add($rdf.sym(this.uri), PROV('endedAtTime'),$rdf.lit(this.endedAtTime, 'en', XSD('dateTime')) )
 
         if (this.wasAssociatedWith) {
+
+             // get graph of person, add it to this graph
+            var ag = new $rdf.graph;
+            ag = this.wasAssociatedWith.get_graph();
             this.g.add($rdf.sym(this.uri), PROV('wasAssociatedWith'), $rdf.sym(this.wasAssociatedWith.uri));
+            this.g.add(ag);
         }
 
         if (this.used_entities) {
-            var usedE = new $rdf.graph;
-            usedE = this.used_entities.get_graph();
-            this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(this.used_entities.uri));
-            this.g.add(usedE);
+            for (u_entity in this.used_entities) {
+                var usedE = new $rdf.graph;
+                usedE = this.used_entities[u_entity].get_graph();
+                this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(this.used_entities[u_entity].uri));
+                this.g.add(usedE);
+            }
         }
         if (this.generated_entities) {
-            var genE = new $rdf.graph;
-            genE = this.generated_entities.get_graph();
-            this.g.add($rdf.sym(this.uri), PROV('generated'), $rdf.sym(this.generated_entities.uri));
-            this.g.add(genE);
+            for (g_entity in this.generated_entities) {
+                var genE = new $rdf.graph;
+                genE = this.generated_entities[g_entity].get_graph();
+                this.g.add($rdf.sym(this.uri), PROV('generated'), $rdf.sym(this.generated_entities[g_entity].uri));
+                this.g.add(genE);
+            }
         }
+
+
+//        if (this.used_entities) {
+//            var usedE = new $rdf.graph;
+//            usedE = this.used_entities.get_graph();
+//            this.g.add($rdf.sym(this.uri), PROV('used'), $rdf.sym(this.used_entities.uri));
+//            this.g.add(usedE);
+//        }
+//        if (this.generated_entities) {
+//            var genE = new $rdf.graph;
+//            genE = this.generated_entities.get_graph();
+//            this.g.add($rdf.sym(this.uri), PROV('generated'), $rdf.sym(this.generated_entities.uri));
+//            this.g.add(genE);
+//        }
     };
 
     this.get_graph = function () {
@@ -299,6 +322,9 @@ function Report(label, reportingSystemURI, nativeId, reportActivity, comment, re
         this.g.add($rdf.sym(this.uri), PROMS('endingActivity'), $rdf.sym(this.reportActivity.uri));
 
         this.g.add($rdf.sym(this.uri), PROV('generatedAtTime'), $rdf.lit(this.generatedAtTime, 'en', XSD('dateTime')) )
+
+
+
     };
 
 
