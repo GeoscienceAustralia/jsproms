@@ -11,7 +11,7 @@ promsclient.js is expected to be extended so if you need so add to it to get you
 This repository is licensed under Creative Commons 4.0 International. See the [license deed](LICENSE) in this repository for details.
 
 
-### Contacts
+## Contacts
 **Laura Stanford**  
 *Lead developer*  
 <laura.stanford@ga.gov.au)>  
