@@ -6,5 +6,12 @@ The classes match the PROMS-O OWL classes, for example the function 'ReportingSy
 
 promsclient.js is expected to be extended so if you need so add to it to get your reporting job done, please do so! Please also consider sending us pull requests to incorporate your additions here.
 
-### Contact
-* Lead developer: Laura Stanford (laura.stanford@ga.gov.au)
+
+## License
+This repository is licensed under Creative Commons 4.0 International. See the [license deed](LICENSE) in this repository for details.
+
+
+### Contacts
+**Laura Stanford**  
+*Lead developer*  
+<laura.stanford@ga.gov.au)>  
